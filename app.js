@@ -84,18 +84,18 @@ app.get('/', async (req, res) => {
                 }).format(order.total);
 
                 tableRows += `
-                    <tr class="clickable-row" data-href="/details/${order.salesorder_id}">
-                        <td data-column="date">${order.date}</td>
-                        <td data-column="salesorder_number">${order.salesorder_number}</td>
-                        <td data-column="customer_name">${order.customer_name}</td>
-                        <td data-column="reference_number">${order.reference_number}</td>
-                        <td data-column="total">${formattedTotal}</td>
-                        <td data-column="status">${order.status}</td>
-                        <td data-column="invoiced_status">${order.invoiced_status}</td>
-                        <td data-column="payment_status">${order.payment_status}</td>
-                        <td data-column="expected_shipment_date">${order.expected_shipment_date}</td>
-                        <td data-column="order_status">${order.order_status}</td>
-                        <td data-column="delivery_method">${order.delivery_method}</td>
+                    <tr class="clickable-row" data-href="/details/${order.salesorder_id || '—' }">
+                        <td data-column="date">${order.date || '—' }</td>
+                        <td data-column="salesorder_number">${order.salesorder_number || '—' }</td>
+                        <td data-column="customer_name">${order.customer_name || '—' }</td>
+                        <td data-column="reference_number">${order.reference_number || '—' }</td>
+                        <td data-column="total">${formattedTotal || '—' }</td>
+                        <td data-column="status">${order.status || '—' }</td>
+                        <td data-column="invoiced_status">${order.invoiced_status || '—' }</td>
+                        <td data-column="payment_status">${order.payment_status || '—' }</td>
+                        <td data-column="expected_shipment_date">${order.expected_shipment_date || '—' }</td>
+                        <td data-column="order_status">${order.order_status || '—' }</td>
+                        <td data-column="delivery_method">${order.delivery_method || '—' }</td>
                     </tr>
                 `;
             });
@@ -485,7 +485,6 @@ app.get('/', async (req, res) => {
                 <input type="number" id="downloadCount" min="1" max="1000" value="100">
                 <button onclick="downloadData('excel')">Download Excel</button>
                 <button onclick="downloadData('csv')">Download CSV</button>
-                <button onclick="downloadData('pdf')">Download PDF</button>
             </div>
         </div>
         <div class="table-container">
@@ -685,7 +684,7 @@ app.get('/', async (req, res) => {
     const count = document.getElementById('downloadCount').value;
     showLoader();
     window.location.href = \`/download?format=\${format}&count=\${count}\`;
-    setTimeout(hideLoader, 3000); // Hide loader after 3 seconds
+    setTimeout(hideLoader, 1500); // Hide loader after 1.5 seconds
     }
 </script>
 </body>
