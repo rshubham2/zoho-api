@@ -83,6 +83,14 @@ app.get('/', async (req, res) => {
                     currency: 'INR'
                 }).format(order.total);
 
+                function formatValue(value) {
+                return (value && value !== 'not_invoiced') ? value : '—';
+                }
+
+                function formatOrderStatus(value) {
+                return (value && value !== 'pending_approval') ? value : 'pending approval';
+                }
+
                 tableRows += `
                     <tr class="clickable-row" data-href="/details/${order.salesorder_id || '—' }">
                         <td data-column="date">${order.date || '—' }</td>
@@ -91,10 +99,10 @@ app.get('/', async (req, res) => {
                         <td data-column="reference_number">${order.reference_number || '—' }</td>
                         <td data-column="total">${formattedTotal || '—' }</td>
                         <td data-column="status">${order.status || '—' }</td>
-                        <td data-column="invoiced_status">${order.invoiced_status || '—' }</td>
+                        <td data-column="invoiced_status">${formatValue(order.invoiced_status || '—')}</td>
                         <td data-column="payment_status">${order.payment_status || '—' }</td>
                         <td data-column="expected_shipment_date">${order.expected_shipment_date || '—' }</td>
-                        <td data-column="order_status">${order.order_status || '—' }</td>
+                        <td data-column="order_status">${formatOrderStatus(order.order_status || '—')}</td>
                         <td data-column="delivery_method">${order.delivery_method || '—' }</td>
                     </tr>
                 `;
