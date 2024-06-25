@@ -83,12 +83,22 @@ app.get('/login', (req, res) => {
   res.render('login');
 });
 
-app.post('/login', passport.authenticate('local', {
-  successRedirect: '/',
-  failureRedirect: '/login',
-  failureFlash: true
-}));
-
+app.post('/login', (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) {
+      return res.status(500).json({ message: 'An error occurred during login.' });
+    }
+    if (!user) {
+      return res.status(401).json({ message: info.message || 'Login failed.' });
+    }
+    req.logIn(user, (err) => {
+      if (err) {
+        return res.status(500).json({ message: 'An error occurred during login.' });
+      }
+      return res.redirect('/');
+    });
+  })(req, res, next);
+});
 // Register route
 app.get('/register', (req, res) => {
   res.render('register');
@@ -96,12 +106,21 @@ app.get('/register', (req, res) => {
 
 app.post('/register', async (req, res) => {
   try {
-    const hashedPassword = await bcryptjs.hash(req.body.password, 10);
-    const newUser = new User({ username: req.body.username, password: hashedPassword });
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ message: 'Username and password are required.' });
+    }
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Username already exists.' });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ username, password: hashedPassword });
     await newUser.save();
     res.redirect('/login');
-  } catch {
-    res.redirect('/register');
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ message: 'An error occurred during registration.' });
   }
 });
 

@@ -49,7 +49,7 @@
                 },
                 body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
             })
-                .then(response => {
+ .then(response => {
                     if (response.redirected) {
                         window.location.href = response.url;
                     } else {
