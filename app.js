@@ -77,6 +77,7 @@ app.get('/login', (req, res) => {
 app.post('/login', passport.authenticate('local', {
   successRedirect: '/',
   failureRedirect: '/login',
+  failureFlash: true
 }));
 
 // Register route
@@ -350,3 +351,5 @@ app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
   
 }); 
+
+module.exports = app;

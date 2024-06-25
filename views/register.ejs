@@ -6,26 +6,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Sales Order System</title>
     <link rel="stylesheet" href="/styles.css">
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
     <div class="container">
-        <h1>Register for Sales Order System</h1>
         <div class="form-container">
-            <form action="/register" method="post">
+            <h1>Create Account</h1>
+            <p class="subtitle">Join the Sales Order System</p>
+            <form id="registerForm" action="/register" method="post">
                 <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" required>
+                    <label for="username">
+                        <i class="fas fa-user"></i>
+                    </label>
+                    <input type="text" id="username" name="username" placeholder="Username" required>
                 </div>
                 <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required>
+                    <label for="password">
+                        <i class="fas fa-lock"></i>
+                    </label>
+                    <input type="password" id="password" name="password" placeholder="Password" required>
                 </div>
+                <div class="form-group">
+                    <label for="confirmPassword">
+                        <i class="fas fa-lock"></i>
+                    </label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label for="department">
+                        <i class="fas fa-building"></i>
+                    </label>
+                    <select id="department" name="department" required>
+                        <option value="">Select Department</option>
+                        <option value="site1">Site 1</option>
+                        <option value="site2">Site 2</option>
+                        <option value="site3">Site 3</option>
+                        <option value="site4">Site 4</option>
+                        <option value="site5">Site 5</option>
+                    </select>
+                </div>
+                <div id="errorMessage" class="error-message"></div>
                 <button type="submit" class="btn btn-block">Register</button>
             </form>
             <p class="text-center mt-3">Already have an account? <a href="/login">Login</a></p>
         </div>
     </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const department = document.getElementById('department').value;
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Client-side validation
+            if (username.trim() === '' || password.trim() === '' || confirmPassword.trim() === '' || department === '') {
+                errorMessage.textContent = 'Please fill in all fields.';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                errorMessage.textContent = 'Passwords do not match.';
+                return;
+            }
+
+            // Send registration request
+            fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password, department }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '/login'; // Redirect to login page on success
+                    } else {
+                        errorMessage.textContent = data.message || 'Registration failed. Please try again.';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    errorMessage.textContent = 'An error occurred. Please try again later.';
+                });
+        });
+    </script>
 </body>
 
 </html>

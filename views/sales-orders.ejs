@@ -5,13 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Orders</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <style>
         :root {
-            --primary-color: #3498db;
-            --secondary-color: #2ecc71;
-            --background-color: #ecf0f1;
-            --text-color: #34495e;
+            --primary-color: #4a90e2;
+            --secondary-color: #5cb85c;
+            --background-color: #f4f7f9;
+            --text-color: #333;
             --card-background: #ffffff;
+            --header-height: 60px;
         }
 
         body,
@@ -24,73 +27,128 @@
             color: var(--text-color);
         }
 
-        th[style*="display: none"] {
-            width: 0;
-            padding: 0;
-            border: 0;
-        }
-
         .container {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
             padding: 20px;
             box-sizing: border-box;
+            padding-top: calc(var(--header-height) + 20px);
         }
 
-        h1 {
-            color: var(--primary-color);
-            text-align: center;
-            margin: 0 0 20px 0;
-            font-size: 2rem;
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info span {
+            margin-right: 15px;
+        }
+
+        .logout-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
         .search-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
+            flex-grow: 1;
+            margin-right: 20px;
         }
 
         .search-container form {
             display: flex;
-            width: 100%;
-            max-width: 600px;
+            max-width: 500px;
         }
 
         input[type="text"] {
             flex-grow: 1;
             padding: 10px;
             font-size: 16px;
-            border: 2px solid var(--primary-color);
-            border-radius: 5px 0 0 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
         }
 
         button {
-            padding: 10px 20px;
+            padding: 10px 15px;
             background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s;
-            font-size: 16px;
-            font-weight: bold;
+            font-size: 14px;
+            font-weight: 500;
         }
 
         .search-container button {
-            border-radius: 0 5px 5px 0;
+            border-radius: 0 4px 4px 0;
         }
 
         button:hover {
-            background-color: #2980b9;
+            background-color: #3a7bc8;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .custom-columns-btn,
+        .download-btn {
+            background-color: var(--secondary-color);
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+
+        .custom-columns-btn:hover,
+        .download-btn:hover {
+            background-color: #4cae4c;
         }
 
         .table-container {
             flex: 1;
             overflow: auto;
             background-color: var(--card-background);
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             margin-bottom: 20px;
         }
 
@@ -109,19 +167,19 @@
         }
 
         th {
-            background-color: var(--primary-color);
-            color: white;
-            font-weight: bold;
+            background-color: #f8f9fa;
+            color: var(--text-color);
+            font-weight: 500;
             text-transform: uppercase;
-            font-size: 14px;
+            font-size: 12px;
             letter-spacing: 0.5px;
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
-        tbody tr:nth-child(even) {
-            background-color: #f8f9fa;
+        tbody tr:hover {
+            background-color: #f5f5f5;
         }
 
         .clickable-row {
@@ -129,135 +187,27 @@
             transition: background-color 0.2s;
         }
 
-        .clickable-row:hover {
-            background-color: #e9ecef;
-        }
-
-        .item-count {
-            text-align: center;
-            margin: 10px 0;
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
             font-size: 14px;
         }
 
         .pagination {
             display: flex;
-            justify-content: center;
-            margin-top: 10px;
+            gap: 10px;
         }
 
         .pagination button {
-            margin: 0 5px;
-        }
-
-        .pagination button.disabled {
-            background-color: #bdc3c7;
-            cursor: not-allowed;
-        }
-
-        .error-message {
-            color: #e74c3c;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 10px;
-            padding: 8px;
-            background-color: #fadbd8;
-            border-radius: 5px;
+            padding: 5px 10px;
             font-size: 14px;
         }
 
-        .loader-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(236, 240, 241, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .loader {
-            width: 50px;
-            height: 50px;
-            border: 5px solid var(--primary-color);
-            border-top: 5px solid var(--secondary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-
-            h1 {
-                font-size: 1.5rem;
-            }
-
-            input[type="text"],
-            button {
-                font-size: 14px;
-            }
-
-            .table-container {
-                margin-bottom: 10px;
-            }
-
-            table {
-                min-width: 100%;
-            }
-
-            th,
-            td {
-                padding: 8px;
-                font-size: 12px;
-            }
-
-            .item-count,
-            .pagination {
-                font-size: 12px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .search-container form {
-                flex-direction: column;
-            }
-
-            input[type="text"],
-            .search-container button {
-                width: 100%;
-                border-radius: 5px;
-            }
-
-            .search-container button {
-                margin-top: 10px;
-            }
-
-            .pagination {
-                flex-wrap: wrap;
-            }
-
-            .pagination button {
-                margin: 5px;
-            }
-        }
-
-        .custom-columns-btn {
-            margin-bottom: 10px;
-            background-color: var(--secondary-color);
+        .pagination button.disabled {
+            background-color: #ddd;
+            cursor: not-allowed;
         }
 
         .modal {
@@ -279,7 +229,8 @@
             border: 1px solid #888;
             width: 80%;
             max-width: 500px;
-            border-radius: 5px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .close {
@@ -315,14 +266,21 @@
             margin-left: 10px;
         }
 
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
         @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-container {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+
+            .action-buttons {
+                justify-content: space-between;
+            }
+
             .info-row {
                 flex-direction: column;
                 align-items: flex-start;
@@ -332,73 +290,38 @@
                 margin-bottom: 10px;
             }
         }
-
-        .download-section {
-            margin-top: 20px;
-            padding: 20px;
-            background-color: var(--card-background);
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .download-options {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .download-options input {
-            width: 80px;
-            padding: 5px;
-        }
-
-        .download-options button {
-            padding: 8px 15px;
-            background-color: var(--secondary-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .download-options button:hover {
-            background-color: #27ae60;
-        }
     </style>
 </head>
 
 <body>
-    <div class="loader-container" id="loader" style="display: none;">
-        <div class="loader"></div>
-    </div>
-    <div class="container">
+    <div class="header">
+        <h1>Sales Order System</h1>
         <div class="user-info">
             <span>Welcome, <%= username %></span>
-            <a href="/logout">Logout</a>
+            <a href="/logout" class="logout-btn">Logout</a>
         </div>
-        <h1>Sales Orders</h1>
-        <div class="search-container">
-            <form action="/" method="GET">
-                <input type="text" id="orderNumber" name="orderNumber" placeholder="Search"
-                    value="<%= orderNumber || '' %>">
-                <button type="submit">Search</button>
-            </form>
+    </div>
+
+    <div class="container">
+        <div class="controls">
+            <div class="search-container">
+                <form action="/" method="GET">
+                    <input type="text" id="orderNumber" name="orderNumber" placeholder="Search by order number"
+                        value="<%= orderNumber || '' %>">
+                    <button type="submit"><i class="fas fa-search"></i> Search</button>
+                </form>
+            </div>
+            <div class="action-buttons">
+                <button id="customColumnsBtn" class="custom-columns-btn"><i class="fas fa-columns"></i>
+                    Customize</button>
+                <button id="downloadBtn" class="download-btn"><i class="fas fa-download"></i> Download</button>
+            </div>
         </div>
+
         <% if (salesOrders.length===0 && orderNumber) { %>
             <div class="error-message">No sales orders found for the given order number.</div>
             <% } %>
-                <button id="customColumnsBtn" class="custom-columns-btn">Customize Columns</button>
-                <div class="download-section">
-                    <h3>Download Data</h3>
-                    <div class="download-options">
-                        <label for="downloadCount">Number of records:</label>
-                        <input type="number" id="downloadCount" min="1" max="1000" value="100">
-                        <button onclick="downloadData('excel')">Download Excel</button>
-                        <button onclick="downloadData('csv')">Download CSV</button>
-                    </div>
-                </div>
+
                 <div class="table-container">
                     <table id="salesOrderTable">
                         <thead>
@@ -420,8 +343,7 @@
                             <% if (salesOrders.length===0) { %>
                                 <tr>
                                     <td colspan="11" style="text-align: center; color: red; font-weight: bold;">No sales
-                                        orders found for the
-                                        given order number.</td>
+                                        orders found for the given order number.</td>
                                 </tr>
                                 <% } else { %>
                                     <% salesOrders.forEach(order=> { %>
@@ -469,28 +391,24 @@
                         </tbody>
                     </table>
                 </div>
+
                 <div class="info-row">
                     <div class="item-count">
                         Showing <%= startItem %> - <%= endItem %> of <%= totalItems %> items
                     </div>
                     <div class="pagination">
-                        <form action="/" method="GET">
-                            <input type="hidden" name="page" value="<%= page - 1 %>">
-                            <button type="submit" <%=page===1 ? 'class="disabled"' : '' %>>Previous</button>
-                        </form>
-                        <form action="/" method="GET">
-                            <input type="hidden" name="page" value="<%= page + 1 %>">
-                            <button type="submit" <%=page===totalPages ? 'class="disabled"' : '' %>>Next</button>
-                        </form>
+                        <button id="prevButton" <%=page===1 ? 'class="disabled"' : '' %>>Previous</button>
+                        <button id="nextButton" <%=page===totalPages ? 'class="disabled"' : '' %>>Next</button>
                     </div>
                 </div>
     </div>
 
+    <!-- Custom Columns Modal -->
     <div id="customColumnsModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>Customize Columns</h2>
-            <ul class="column-list" id="columnList"></ul>
+            <ul id="columnList" class="column-list"></ul>
             <div class="modal-buttons">
                 <button id="saveColumns">Save</button>
                 <button id="cancelColumns">Cancel</button>
@@ -498,82 +416,33 @@
         </div>
     </div>
 
+    <!-- Download Options Modal -->
+    <div id="downloadModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Download Options</h2>
+            <div class="download-options">
+                <label for="downloadCount">Number of records:</label>
+                <input type="number" id="downloadCount" min="1" max="1000" value="100">
+                <button onclick="downloadData('excel')">Download Excel</button>
+                <button onclick="downloadData('csv')">Download CSV</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        function saveColumnPreferences() {
-            const preferences = {};
-            columns.forEach(function (column) {
-                preferences[column.name] = isColumnVisible(column.name);
-            });
-            localStorage.setItem('columnPreferences', JSON.stringify(preferences));
-        }
-
-        function loadColumnPreferences() {
-            const savedPreferences = localStorage.getItem('columnPreferences');
-            if (savedPreferences) {
-                const preferences = JSON.parse(savedPreferences);
-                columns.forEach(function (column) {
-                    const isVisible = preferences[column.name];
-                    const cells = table.querySelectorAll('th[data-column="' + column.name + '"], td[data-column="' + column.name + '"]');
-                    cells.forEach(function (cell) {
-                        cell.style.display = isVisible ? '' : 'none';
-                    });
-                });
-            }
-        }
-
-        function showLoader() {
-            document.getElementById('loader').style.display = 'flex';
-        }
-
-        function hideLoader() {
-            document.getElementById('loader').style.display = 'none';
-        }
-
-        function changePage(newPage) {
-            showLoader();
-            window.location.href = '/?page=' + newPage;
-        }
-
-        function downloadData(format) {
-            const count = document.getElementById('downloadCount').value;
-            showLoader();
-            window.location.href = '/download?format=' + format + '&count=' + count;
-            setTimeout(hideLoader, 1500);
-        }
-
         document.addEventListener('DOMContentLoaded', function () {
-            const rows = document.querySelectorAll('.clickable-row');
-            rows.forEach(function (row) {
-                row.addEventListener('click', function () {
-                    showLoader();
-                    window.location.href = row.dataset.href;
-                });
-            });
-
-            const searchForm = document.querySelector('.search-container form');
-            if (searchForm) {
-                searchForm.addEventListener('submit', showLoader);
-            }
-
-            const paginationForms = document.querySelectorAll('.pagination form');
-            paginationForms.forEach(function (form) {
-                form.addEventListener('submit', function (e) {
-                    if (form.querySelector('button').classList.contains('disabled')) {
-                        e.preventDefault();
-                    } else {
-                        showLoader();
-                    }
-                });
-            });
-
-            // Custom columns functionality
             const customColumnsBtn = document.getElementById('customColumnsBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
             const customColumnsModal = document.getElementById('customColumnsModal');
-            const closeBtn = document.getElementsByClassName('close')[0];
+            const downloadModal = document.getElementById('downloadModal');
+            const closeButtons = document.querySelectorAll('.close');
             const saveColumnsBtn = document.getElementById('saveColumns');
             const cancelColumnsBtn = document.getElementById('cancelColumns');
             const columnList = document.getElementById('columnList');
             const table = document.getElementById('salesOrderTable');
+            const prevButton = document.getElementById('prevButton');
+            const nextButton = document.getElementById('nextButton');
 
             const columns = [
                 { name: 'date', label: 'Date', locked: true },
@@ -589,20 +458,32 @@
                 { name: 'delivery_method', label: 'Delivery Method' }
             ];
 
+            function showModal(modal) {
+                modal.style.display = 'block';
+            }
+
+            function hideModal(modal) {
+                modal.style.display = 'none';
+            }
+
             function populateColumnList() {
                 columnList.innerHTML = '';
                 columns.forEach(function (column) {
                     const li = document.createElement('li');
-                    li.innerHTML = '<label><input type="checkbox" name="column" value="' + column.name + '"' +
-                        (isColumnVisible(column.name) ? ' checked' : '') +
-                        (column.locked ? ' disabled' : '') +
-                        '> ' + column.label + '</label>';
+                    li.innerHTML = `
+                        <label>
+                            <input type="checkbox" name="column" value="${column.name}"
+                                ${isColumnVisible(column.name) ? 'checked' : ''}
+                                ${column.locked ? 'disabled' : ''}>
+                            ${column.label}
+                        </label>
+                    `;
                     columnList.appendChild(li);
                 });
             }
 
             function isColumnVisible(columnName) {
-                const th = table.querySelector('th[data-column="' + columnName + '"]');
+                const th = table.querySelector(`th[data-column="${columnName}"]`);
                 return th.style.display !== 'none';
             }
 
@@ -610,38 +491,92 @@
                 const checkboxes = columnList.querySelectorAll('input[type="checkbox"]');
                 checkboxes.forEach(function (checkbox) {
                     const columnName = checkbox.value;
-                    const cells = table.querySelectorAll('th[data-column="' + columnName + '"], td[data-column="' + columnName + '"]');
+                    const cells = table.querySelectorAll(`th[data-column="${columnName}"], td[data-column="${columnName}"]`);
                     cells.forEach(function (cell) {
                         cell.style.display = checkbox.checked ? '' : 'none';
                     });
                 });
             }
 
-            customColumnsBtn.onclick = function () {
+            function saveColumnPreferences() {
+                const preferences = {};
+                columns.forEach(function (column) {
+                    preferences[column.name] = isColumnVisible(column.name);
+                });
+                localStorage.setItem('columnPreferences', JSON.stringify(preferences));
+            }
+
+            function loadColumnPreferences() {
+                const savedPreferences = localStorage.getItem('columnPreferences');
+                if (savedPreferences) {
+                    const preferences = JSON.parse(savedPreferences);
+                    columns.forEach(function (column) {
+                        const isVisible = preferences[column.name];
+                        const cells = table.querySelectorAll(`th[data-column="${column.name}"], td[data-column="${column.name}"]`);
+                        cells.forEach(function (cell) {
+                            cell.style.display = isVisible ? '' : 'none';
+                        });
+                    });
+                }
+            }
+
+            function downloadData(format) {
+                const count = document.getElementById('downloadCount').value;
+                // Implement your download logic here
+                console.log(`Downloading ${count} records in ${format} format`);
+                hideModal(downloadModal);
+            }
+
+            customColumnsBtn.addEventListener('click', function () {
                 populateColumnList();
-                customColumnsModal.style.display = "block";
-            };
+                showModal(customColumnsModal);
+            });
 
-            closeBtn.onclick = function () {
-                customColumnsModal.style.display = "none";
-            };
+            downloadBtn.addEventListener('click', function () {
+                showModal(downloadModal);
+            });
 
-            saveColumnsBtn.onclick = function () {
+            closeButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    hideModal(this.closest('.modal'));
+                });
+            });
+
+            saveColumnsBtn.addEventListener('click', function () {
                 toggleColumns();
                 saveColumnPreferences();
-                customColumnsModal.style.display = "none";
-            };
+                hideModal(customColumnsModal);
+            });
 
-            cancelColumnsBtn.onclick = function () {
-                customColumnsModal.style.display = "none";
-            };
+            cancelColumnsBtn.addEventListener('click', function () {
+                hideModal(customColumnsModal);
+            });
 
-            window.onclick = function (event) {
-                if (event.target == customColumnsModal) {
-                    customColumnsModal.style.display = "none";
+            prevButton.addEventListener('click', function () {
+                if (!this.classList.contains('disabled')) {
+                    // Implement previous page logic
+                    console.log('Go to previous page');
                 }
-            };
+            });
 
+            nextButton.addEventListener('click', function () {
+                if (!this.classList.contains('disabled')) {
+                    // Implement next page logic
+                    console.log('Go to next page');
+                }
+            });
+
+            // Clickable rows
+            const rows = document.querySelectorAll('.clickable-row');
+            rows.forEach(function (row) {
+                row.addEventListener('click', function () {
+                    const url = this.dataset.href;
+                    // Implement navigation logic
+                    console.log(`Navigating to: ${url}`);
+                });
+            });
+
+            // Initialize
             loadColumnPreferences();
         });
     </script>
