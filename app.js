@@ -4,12 +4,21 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const MongoStore = require('connect-mongo');
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const bcryptjs = require('bcryptjs');
 const axios = require('axios');
 const path = require('path');
 
 const app = express();
 const port = 3000;
+
+try {
+  require.resolve('ejs');
+  console.log('EJS is installed');
+} catch(e) {
+  console.error('EJS is not installed:', e);
+}
+
+app.set('view engine', 'ejs');
 
 // MongoDB connection
 mongoose.connect('mongodb+srv://admin:admin123@cluster0.idwldf8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', { useNewUrlParser: true, useUnifiedTopology: true })
