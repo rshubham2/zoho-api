@@ -296,41 +296,43 @@ const xlsx = require('xlsx');
 const csv = require('fast-csv');
 const PDFDocument = require('pdfkit');
 
-app.get('/download', ensureAuthenticated, async (req, res) => {
-  const format = req.query.format;
-  const count = parseInt(req.query.count) || 100;
-
-  if (format) {
+app.get('/download', async (req, res) => {
     try {
-      const response = await axios.get(`${apiUrl}&per_page=${count}`, {
-        headers: {
-          'Authorization': 'Zoho-oauthtoken ' + accessToken
+        const format = req.query.format;
+        const count = parseInt(req.query.count);
+
+        // Validate input
+        if (!['excel', 'csv', 'pdf'].includes(format) || isNaN(count) || count < 1 || count > 1000) {
+            return res.status(400).send('Invalid format or count');
         }
-      });
 
-      const salesOrders = response.data.salesorders;
+        // Generate the file based on format and count
+        let file;
+        switch (format) {
+            case 'excel':
+                file = await generateExcelFile(count);
+                res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                res.setHeader('Content-Disposition', 'attachment; filename=sales_orders.xlsx');
+                break;
+            case 'csv':
+                file = await generateCsvFile(count);
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=sales_orders.csv');
+                break;
+            case 'pdf':
+                file = await generatePdfFile(count);
+                res.setHeader('Content-Type', 'application/pdf');
+                res.setHeader('Content-Disposition', 'attachment; filename=sales_orders.pdf');
+                break;
+        }
 
-      switch (format) {
-        case 'excel':
-          downloadExcel(res, salesOrders);
-          break;
-        case 'csv':
-          downloadCSV(res, salesOrders);
-          break;
-        case 'pdf':
-          downloadPDF(res, salesOrders);
-          break;
-        default:
-          res.status(400).send('Invalid format specified');
-      }
+        res.send(file);
     } catch (error) {
-      console.error('Error:', error);
-      res.status(500).send('An error occurred');
+        console.error('Download error:', error);
+        res.status(500).send('An error occurred while generating the file');
     }
-  } else {
-    res.render('download', { user: req.user });
-  }
 });
+
 
 function downloadExcel(res, data) {
   const worksheet = xlsx.utils.json_to_sheet(data);
@@ -378,6 +380,52 @@ function downloadPDF(res, data) {
   });
 
   doc.end();
+}
+
+async function generateExcelFile(count) {
+    const salesOrders = await fetchSalesOrders(count);
+    const worksheet = XLSX.utils.json_to_sheet(salesOrders);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sales Orders");
+    return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+}
+
+async function generateCsvFile(count) {
+    const salesOrders = await fetchSalesOrders(count);
+    const csvWriter = createCsvWriter({
+        path: 'sales_orders.csv',
+        header: [
+            {id: 'id', title: 'ID'},
+            {id: 'date', title: 'Date'},
+            {id: 'customer', title: 'Customer'},
+            {id: 'total', title: 'Total'}
+        ]
+    });
+    await csvWriter.writeRecords(salesOrders);
+    return require('fs').readFileSync('sales_orders.csv');
+}
+
+async function generatePdfFile(count) {
+    const salesOrders = await fetchSalesOrders(count);
+    const doc = new PDFDocument();
+    let buffers = [];
+    doc.on('data', buffers.push.bind(buffers));
+    doc.on('end', () => {});
+
+    doc.fontSize(16).text('Sales Orders Report', {align: 'center'});
+    doc.moveDown();
+    salesOrders.forEach(order => {
+        doc.fontSize(12).text(`ID: ${order.id}, Date: ${order.date}, Customer: ${order.customer}, Total: $${order.total.toFixed(2)}`);
+        doc.moveDown();
+    });
+
+    doc.end();
+
+    return new Promise((resolve) => {
+        doc.on('end', () => {
+            resolve(Buffer.concat(buffers));
+        });
+    });
 }
 
 module.exports = app;
