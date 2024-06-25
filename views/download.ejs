@@ -50,15 +50,52 @@
         <a href="/" class="btn">Back to Sales Orders</a>
         <div class="download-options">
             <h2>Download Options</h2>
-            <form class="download-form" action="/download" method="GET">
+            <form id="downloadForm" class="download-form">
                 <label for="count">Number of records:</label>
                 <input type="number" id="count" name="count" min="1" max="1000" value="100">
-                <button type="submit" name="format" value="excel" class="btn">Download Excel</button>
-                <button type="submit" name="format" value="csv" class="btn">Download CSV</button>
-                <button type="submit" name="format" value="pdf" class="btn">Download PDF</button>
+                <button type="button" onclick="downloadData('excel')" class="btn">Download Excel</button>
+                <button type="button" onclick="downloadData('csv')" class="btn">Download CSV</button>
+                <button type="button" onclick="downloadData('pdf')" class="btn">Download PDF</button>
             </form>
+            <div id="loader" class="loader"></div>
+            <div id="message"></div>
         </div>
     </div>
+    <script>
+        function downloadData(format) {
+            const count = document.getElementById('count').value;
+            const loader = document.getElementById('loader');
+            const message = document.getElementById('message');
+
+            loader.style.display = 'block';
+            message.textContent = '';
+
+            fetch(`/download?format=${format}&count=${count}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = `sales_orders.${format}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(error => {
+                    console.error('Download error:', error);
+                    message.textContent = 'An error occurred while downloading. Please try again.';
+                })
+                .finally(() => {
+                    loader.style.display = 'none';
+                });
+        }
+    </script>
 </body>
 
 </html>
