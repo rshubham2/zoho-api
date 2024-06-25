@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Order Details</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #ecf0f1;
+            --text-color: #34495e;
+            --card-background: #ffffff;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: var(--card-background);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .order-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .company-info,
+        .customer-info,
+        .order-info {
+            background-color: var(--background-color);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            margin-top: 0;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--background-color);
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .order-totals,
+        .additional-info {
+            background-color: var(--background-color);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .order-totals p,
+        .additional-info p {
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1,
+            h2 {
+                font-size: 1.5em;
+            }
+
+            .order-details {
+                grid-template-columns: 1fr;
+            }
+
+            th,
+            td {
+                padding: 8px;
+            }
+        }
+
+        .loader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(236, 240, 241, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--primary-color);
+            border-top: 5px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loader-container" id="loader" style="display: none;">
+        <div class="loader"></div>
+    </div>
+
+    <div class="container">
+        <a href="/" class="back-button" aria-label="Back to Sales Orders">Back</a>
+        <h1>Sales Order Details</h1>
+        <h2>Sales Order# <%= order.salesorder_number %>
+        </h2>
+        <div class="order-details">
+            <div class="company-info">
+                <h3>VC TECHNOSOLUTIONS PRIVATE LIMITED</h3>
+                <p>Office No-607, 608 Mayuresh Cosmos,</p>
+                <p>Plot No 37, Sector - 11, CBD Belapur</p>
+                <p>Navi Mumbai Maharashtra 400614</p>
+                <p>India</p>
+                <p>GSTIN 27AAHCV4369B1Z8</p>
+            </div>
+            <div class="customer-info">
+                <h3>
+                    <%= order.customer_name %>
+                </h3>
+                <p>
+                    <%= order.billing_address.address %>
+                </p>
+                <p>
+                    <%= order.billing_address.city %>
+                        <%= order.billing_address.state %>
+                            <%= order.billing_address.zip %>
+                </p>
+                <p>
+                    <%= order.billing_address.country %>
+                </p>
+                <p>GSTIN <%= order.customer_gst_no || 'N/A' %>
+                </p>
+            </div>
+            <div class="order-info">
+                <p><strong>Order Date:</strong>
+                    <%= order.date %>
+                </p>
+                <p><strong>Ref#:</strong>
+                    <%= order.reference_number || 'N/A' %>
+                </p>
+                <p><strong>Delivery Method:</strong>
+                    <%= order.delivery_method || 'N/A' %>
+                </p>
+                <p><strong>Place Of Supply:</strong>
+                    <%= order.place_of_supply || 'N/A' %>
+                </p>
+            </div>
+        </div>
+
+        <h3>Line Items</h3>
+        <div class="table-responsive">
+            <table aria-label="Sales Order Line Items">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Description</th>
+                        <th>HSN/SAC</th>
+                        <th>Qty</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (order.line_items && order.line_items.length> 0) { %>
+                        <% order.line_items.forEach((item, index)=> { %>
+                            <tr>
+                                <td>
+                                    <%= index + 1 %>
+                                </td>
+                                <td>
+                                    <%= item.name %>
+                                </td>
+                                <td>
+                                    <%= item.hsn_or_sac || 'N/A' %>
+                                </td>
+                                <td>
+                                    <%= item.quantity %>
+                                        <%= item.unit || 'Nos.' %>
+                                </td>
+                                <td>
+                                    <%= new Intl.NumberFormat('en-IN', { style: 'currency' , currency: 'INR'
+                                        }).format(item.rate) %>
+                                </td>
+                                <td>
+                                    <%= new Intl.NumberFormat('en-IN', { style: 'currency' , currency: 'INR'
+                                        }).format(item.item_total) %>
+                                </td>
+                            </tr>
+                            <% }); %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="6">No line items available</td>
+                                    </tr>
+                                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="order-totals">
+            <h3>Order Totals</h3>
+            <p><strong>Sub Total:</strong>
+                <%= new Intl.NumberFormat('en-IN', { style: 'currency' , currency: 'INR' }).format(order.sub_total) %>
+            </p>
+            <p><strong>IGST18 (18%):</strong>
+                <%= new Intl.NumberFormat('en-IN', { style: 'currency' , currency: 'INR' }).format(order.tax_total) %>
+            </p>
+            <p><strong>Total:</strong>
+                <%= new Intl.NumberFormat('en-IN', { style: 'currency' , currency: 'INR' }).format(order.total) %>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function showLoader() {
+            document.getElementById('loader').style.display = 'flex';
+        }
+
+        function hideLoader() {
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const backButton = document.querySelector('.back-button');
+            if (backButton) {
+                backButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showLoader();
+                    window.location.href = backButton.href;
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
