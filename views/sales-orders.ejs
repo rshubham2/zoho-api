@@ -294,6 +294,9 @@
 </head>
 
 <body>
+    <div class="loader-container" id="loader" style="display: none;">
+        <div class="loader"></div>
+    </div>
     <div class="header">
         <h1>Sales Order System</h1>
         <div class="user-info">
@@ -522,9 +525,27 @@
 
             function downloadData(format) {
                 const count = document.getElementById('downloadCount').value;
-                // Implement your download logic here
-                console.log(`Downloading ${count} records in ${format} format`);
-                hideModal(downloadModal);
+                showLoader(); // Show loader while downloading
+                fetch(`/download?format=${format}&count=${count}`)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = `sales_orders.${format}`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    })
+                    .catch(error => {
+                        console.error('Download error:', error);
+                        alert('An error occurred while downloading. Please try again.');
+                    })
+                    .finally(() => {
+                        hideLoader(); // Hide loader after download attempt
+                        hideModal(downloadModal);
+                    });
             }
 
             customColumnsBtn.addEventListener('click', function () {
@@ -566,15 +587,22 @@
                 }
             });
 
-            // Clickable rows
+           // Clickable rows
             const rows = document.querySelectorAll('.clickable-row');
             rows.forEach(function (row) {
                 row.addEventListener('click', function () {
                     const url = this.dataset.href;
-                    // Implement navigation logic
-                    console.log(`Navigating to: ${url}`);
+                    window.location.href = url;
                 });
             });
+
+            function showLoader() {
+                document.getElementById('loader').style.display = 'flex';
+            }
+
+            function hideLoader() {
+                document.getElementById('loader').style.display = 'none';
+            }
 
             // Initialize
             loadColumnPreferences();
