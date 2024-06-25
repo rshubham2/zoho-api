@@ -28,10 +28,12 @@ mongoose.connect('mongodb+srv://admin:admin123@cluster0.idwldf8.mongodb.net/?ret
 // User model
 const User = mongoose.model('User', new mongoose.Schema({
   username: String,
-  password: String
+  password: String,
+  department: String
 }));
 
 // Middleware
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
   secret: 'your_session_secret',
@@ -41,6 +43,10 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+const cors = require('cors');
+app.use(cors());
+
+
 
 // Passport configuration
 passport.use(new LocalStrategy(async (username, password, done) => {
@@ -106,21 +112,22 @@ app.get('/register', (req, res) => {
 
 app.post('/register', async (req, res) => {
   try {
-    const { username, password } = req.body;
-    if (!username || !password) {
-      return res.status(400).json({ message: 'Username and password are required.' });
+    console.log('Received registration request:', req.body);
+    const { username, password, department } = req.body;
+    if (!username || !password || !department) {
+      return res.status(400).json({ success: false, message: 'Username, password, and department are required.' });
     }
     const existingUser = await User.findOne({ username });
     if (existingUser) {
-      return res.status(400).json({ message: 'Username already exists.' });
+      return res.status(400).json({ success: false, message: 'Username already exists.' });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, password: hashedPassword });
+    const newUser = new User({ username, password: hashedPassword, department });
     await newUser.save();
-    res.redirect('/login');
+    res.json({ success: true, message: 'Registration successful' });
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ message: 'An error occurred during registration.' });
+    res.status(500).json({ success: false, message: 'An error occurred during registration.' });
   }
 });
 
