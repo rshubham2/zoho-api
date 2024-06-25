@@ -447,6 +447,10 @@
             const prevButton = document.getElementById('prevButton');
             const nextButton = document.getElementById('nextButton');
 
+            downloadBtn.addEventListener('click', function () {
+                showModal(downloadModal);
+            });
+
             const columns = [
                 { name: 'date', label: 'Date', locked: true },
                 { name: 'salesorder_number', label: 'Sales Order#', locked: true },
@@ -575,15 +579,20 @@
 
             prevButton.addEventListener('click', function () {
                 if (!this.classList.contains('disabled')) {
-                    // Implement previous page logic
-                    console.log('Go to previous page');
+                    const currentPage = parseInt('<%= page %>');
+                    if (currentPage > 1) {
+                        window.location.href = `/?page=${currentPage - 1}`;
+                    }
                 }
             });
 
             nextButton.addEventListener('click', function () {
                 if (!this.classList.contains('disabled')) {
-                    // Implement next page logic
-                    console.log('Go to next page');
+                    const currentPage = parseInt('<%= page %>');
+                    const totalPages = parseInt('<%= totalPages %>');
+                    if (currentPage < totalPages) {
+                        window.location.href = `/?page=${currentPage + 1}`;
+                    }
                 }
             });
 
