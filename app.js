@@ -353,35 +353,6 @@ function downloadCSV(res, data) {
     .pipe(res);
 }
 
-function downloadPDF(res, data) {
-  const doc = new PDFDocument();
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', 'attachment; filename=sales_orders.pdf');
-
-  doc.pipe(res);
-
-  doc.fontSize(16).text('Sales Orders', { align: 'center' });
-  doc.moveDown();
-
-  const tableTop = 150;
-  const itemsPerPage = 20;
-  let itemCount = 0;
-
-  data.forEach((order, index) => {
-    if (itemCount >= itemsPerPage) {
-      doc.addPage();
-      itemCount = 0;
-    }
-
-    doc.fontSize(10).text(`${order.salesorder_number} - ${order.customer_name}`, 50, tableTop + (itemCount * 20));
-    doc.text(order.total, 400, tableTop + (itemCount * 20));
-
-    itemCount++;
-  });
-
-  doc.end();
-}
-
 async function generateExcelFile(count) {
     const salesOrders = await fetchSalesOrders(count);
     const worksheet = XLSX.utils.json_to_sheet(salesOrders);
