@@ -4,7 +4,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const MongoStore = require('connect-mongo');
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const axios = require('axios');
 const path = require('path');
 
@@ -38,7 +38,7 @@ passport.use(new LocalStrategy(async (username, password, done) => {
   try {
     const user = await User.findOne({ username: username });
     if (!user) return done(null, false, { message: 'Incorrect username.' });
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcryptjs.compare(password, user.password);
     if (isMatch) return done(null, user);
     return done(null, false, { message: 'Incorrect password.' });
   } catch (err) {
@@ -87,7 +87,7 @@ app.get('/register', (req, res) => {
 
 app.post('/register', async (req, res) => {
   try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const hashedPassword = await bcryptjs.hash(req.body.password, 10);
     const newUser = new User({ username: req.body.username, password: hashedPassword });
     await newUser.save();
     res.redirect('/login');
